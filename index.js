@@ -18,7 +18,18 @@ const getTalkers = async (_req, res) => {
   }
 };
 
+const getTalkerId = async (req, res) => {
+  const { id } = req.params;
+  const talkersJSON = JSON.parse(await fs.readFile('./talker.json'));
+  const idTalker = talkersJSON.find((t) => t.id === Number(id));
+
+  if (!idTalker) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+  res.status(HTTP_OK_STATUS).json(idTalker);
+};
+
 app.get('/talker', getTalkers);
+
+app.get('/talker/:id', getTalkerId);
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
