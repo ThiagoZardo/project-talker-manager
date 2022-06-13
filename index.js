@@ -27,9 +27,28 @@ const getTalkerId = async (req, res) => {
   res.status(HTTP_OK_STATUS).json(idTalker);
 };
 
+// função baseada no artigo https://www.webtutorial.com.br/funcao-para-gerar-uma-string-aleatoria-random-com-caracteres-especificos-em-javascript/
+const tokenGenerator = () => {
+  let token = '';
+  const tokenLength = 16;
+  const char = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  for (let i = 0; i < tokenLength; i += 1) {
+      token += char.charAt(Math.random() * char.length);
+  }
+  return token;
+};
+
+// Req 01
 app.get('/talker', getTalkers);
 
+// Req 02
 app.get('/talker/:id', getTalkerId);
+
+// Req 03
+app.post('/login', async (req, res) => {
+  const { email, password } = req.body;
+  if (email && password) return res.status(HTTP_OK_STATUS).json({ token: tokenGenerator() });
+});
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
