@@ -45,9 +45,29 @@ app.get('/talker', getTalkers);
 app.get('/talker/:id', getTalkerId);
 
 // Req 03
-app.post('/login', async (req, res) => {
+const validateEmail = (email, res) => {
+  const emailRegex = /\S+@\S+\.\S+/;
+  if (!email) return res.status(400).json({ message: 'O campo "email" é obrigatório' });
+
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: 'O "email" deve ter o formato "email@email.com"' });
+  }
+};
+
+const validatePassword = (password, res) => {
+  if (!password) {
+    return res.status(400).json({ message: 'O campo "password" é obrigatório' });
+  }
+  if (password.length < 6) {
+    return res.status(400).json({ message: 'O "password" deve ter pelo menos 6 caracteres' }); 
+  }
+};
+
+app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  if (email && password) return res.status(HTTP_OK_STATUS).json({ token: tokenGenerator() });
+  validateEmail(email, res);
+  validatePassword(password, res);
+  return res.status(HTTP_OK_STATUS).json({ token: tokenGenerator() });
 });
 
 // não remova esse endpoint, e para o avaliador funcionar
