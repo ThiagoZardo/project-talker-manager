@@ -14,7 +14,7 @@ const getTalkers = async (_req, res) => {
     if (talkersJSON.length === 0) return res.status(HTTP_OK_STATUS).send([]);
     return res.status(HTTP_OK_STATUS).json(talkersJSON);
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -101,13 +101,16 @@ const validateAge = (age, res) => {
   }
 };
 
-const validateTalk = (talk, res) => {
+const validateTalk = (req, res, next) => {
+  const { talk } = req.body;
   if (!talk) {
     return res.status(400).json({ message: 'O campo "talk" é obrigatório' });
   }
+  next();
 };
 
-const validateWatchedAt = (watchedAt, res) => {
+const validateWatchedAt = (req, res, next) => {
+  const { watchedAt } = req.body.talk;
   const formateWatchedAt = /^(0?[1-9]|[12][0-9]|3[01])[/](0?[1-9]|1[012])[/]\d{4}$/;
   if (!watchedAt) {
     return res.status(400).json({ message: 'O campo "watchedAt" é obrigatório' });
@@ -115,34 +118,34 @@ const validateWatchedAt = (watchedAt, res) => {
   if (!formateWatchedAt.test(watchedAt)) {
     return res.status(400).json({ message: 'O campo "watchedAt" deve ter o formato "dd/mm/aaaa"' });
   }
+  next();
 };
 
-const validateRate = (rate, res) => {
+const validateRate = (req, res, next) => {
+  const { rate } = req.body.talk;
   if (!rate) {
     return res.status(400).json({ message: 'O campo "rate" é obrigatório' });
   }
   if ((rate % 1 !== 0) || (rate > 5) || (rate < 1)) {
-    return res.statys(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
+    return res.status(400).json({ message: 'O campo "rate" deve ser um inteiro de 1 à 5' });
   }
+  next();
 };
 
-app.post('/talker', (req, res) => {
+app.post('/talker', validateTalk, validateWatchedAt, validateRate, async (req, res) => {
   try {
-    // const fileContent = await fs.readFile('./talker.json', 'utf-8');
-    // const talkersJSON = JSON.parse(fileContent);
+    const fileContent = await fs.readFile('./talker.json', 'utf-8');
+    const talkersJSON = JSON.parse(fileContent);
     const { name, age, talk } = req.body;
     const token = req.headers.authorization;
     validateAge(age, res);
     validateName(name, res);
     validateToken(token, res);
-    validateTalk(talk, res);
-    validateWatchedAt(talk, res);
-    validateRate(talk, res);
-    // talkersJSON.push({ name, age, talk });
-    // await fs.writeFile('./talker.json', JSON.stringify(talkersJSON));
-    // return res.status(201).json(talkersJSON);
+    talkersJSON.push({ name, age, talk });
+    await fs.writeFile('./talker.json', JSON.stringify(talkersJSON));
+    return res.status(201).send(talkersJSON);
   } catch (error) {
-    console.log(error);
+    console.error(error.message);
   }
 });
 
