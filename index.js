@@ -1,6 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { writeContentFile, updateContentFile } = require('./utils');
+const {
+  writeContentFile,
+  readContentFile,
+  updateContentFile,
+  deleteContentFile,
+} = require('./utils');
 const tokenGenerator = require('./middlewares/tokenGenerator');
 const getTalkers = require('./middlewares/getTalkers');
 const getTalkerId = require('./middlewares/getTalkersId');
@@ -63,6 +68,14 @@ async (req, res) => {
   const talkersJSON = { id: Number(id), name, age, talk };
   await updateContentFile(talkersJSON);
   return res.status(HTTP_OK_STATUS).json(talkersJSON);
+});
+
+// Req 07
+app.delete('/talker/:id', validateToken, async (req, res) => {
+  const { id } = req.params;
+  const talkersJSON = { id: Number(id) };
+  await deleteContentFile(talkersJSON);
+  res.status(204).json(talkersJSON).end();
 });
 
 app.use(errorMiddleware);
