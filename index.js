@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const {
+  readContentFile,
   writeContentFile,
   updateContentFile,
   deleteContentFile,
@@ -28,6 +29,14 @@ const PORT = '3000';
 
 // Req 01
 app.get('/talker', getTalkers);
+
+// Req 08
+app.get('/talker/search', validateToken, async (req, res) => {
+  const { q } = req.query;
+  const readFile = await readContentFile();
+  const filtererTalkers = readFile.filter((r) => r.name.includes(q));
+  return res.status(HTTP_OK_STATUS).json(filtererTalkers);
+});
 
 // Req 02
 app.get('/talker/:id', getTalkerId);
@@ -74,7 +83,7 @@ app.delete('/talker/:id', validateToken, async (req, res) => {
   const { id } = req.params;
   const talkersJSON = { id: Number(id) };
   await deleteContentFile(talkersJSON);
-  res.status(204).json(talkersJSON).end();
+  return res.status(204).json(talkersJSON).end();
 });
 
 app.use(errorMiddleware);
