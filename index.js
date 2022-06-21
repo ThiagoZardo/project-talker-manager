@@ -1,11 +1,12 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const { writeContentFile } = require('./utils');
+const { writeContentFile, updateContentFile } = require('./utils');
 const tokenGenerator = require('./middlewares/tokenGenerator');
 const getTalkers = require('./middlewares/getTalkers');
 const getTalkerId = require('./middlewares/getTalkersId');
 const { validateEmail, validatePassword } = require('./middlewares/validateLogin');
 const generateId = require('./middlewares/generateId');
+const errorMiddleware = require('./middlewares/errorMiddleware');
 const {
   validateTalk,
   validateWatchedAt,
@@ -39,7 +40,7 @@ validateTalk,
 validateWatchedAt,
 validateRate,
 validateName,
-validateAge, 
+validateAge,
 async (req, res) => {
   const { name, age, talk } = req.body;
   const id = await generateId();
@@ -47,6 +48,24 @@ async (req, res) => {
   await writeContentFile(talkersJSON);
   return res.status(201).json(talkersJSON);
 });
+
+// Req 06
+app.put('/talker/:id',
+validateToken,
+validateName,
+validateAge,
+validateTalk,
+validateRate,
+validateWatchedAt,
+async (req, res) => {
+  const { id } = req.params;
+  const { name, age, talk } = req.body;
+  const talkersJSON = { id: Number(id), name, age, talk };
+  await updateContentFile(talkersJSON);
+  return res.status(HTTP_OK_STATUS).json(talkersJSON);
+});
+
+app.use(errorMiddleware);
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {

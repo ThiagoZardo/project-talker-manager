@@ -10,7 +10,17 @@ const writeContentFile = async (data) => {
   await fs.writeFile('./talker.json', talkerJSONToStr);
 };
 
+const updateContentFile = async (data) => {
+  const talker = await readContentFile();
+  const talkersFilter = talker.filter((el) => el.id !== data.id);
+  talkersFilter.push(data);
+  const talkerJSONToStr = JSON.stringify(talkersFilter);
+  console.log(talkerJSONToStr);
+  await fs.writeFile('./talker.json', talkerJSONToStr);
+};
+
 module.exports = {
   readContentFile,
   writeContentFile,
+  updateContentFile,
 };
